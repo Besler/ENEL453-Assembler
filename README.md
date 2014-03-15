@@ -38,8 +38,14 @@ An assembler for a simple processor designed in ENEL453.  This supports comments
 
 ## List of Register:
   Reg0:   General Purpose Register
+
   Reg1:   General Purpose Register
+
   P1:     Register reading into first digit of seven segment display
+
   P2:     Register reading into second digit of seven segment display
+
   Tx:     UART transmit register
+
   Rx:     UART receive register
+
