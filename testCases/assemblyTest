@@ -68,7 +68,7 @@ cp "../${programFile}" .
 touch "${reportFileName}"
 echo "Report created `date`" >> "${reportFileName}"
 echo "${firstHeader}" >> "${reportFileName}"
-
+echo "${firstHeader}"
 # For each file, run the program, test the cases, see if it works
 for file in ${testFiles}; do
   temp="`basename ${file} ${testFileAbb}`"
@@ -78,6 +78,10 @@ for file in ${testFiles}; do
   echo "${secondHeader}" >> "${reportFileName}"
   echo "Test Case: ${file}" >> "${reportFileName}"
   echo "${secondHeader}" >> "${reportFileName}"
+
+  echo "${secondHeader}"
+  echo "Test Case: ${file}"
+  echo "${secondHeader}"
 
   # Run it as a hex file
   python ${programFile} ${file} >> "${temp}${outFileAbb}"
@@ -118,6 +122,7 @@ for file in ${testFiles}; do
   # Split by end line
   echo "" >> "${reportFileName}"
 done
+echo "${firstHeader}"
 
 # Print information on the processing
 echo "Finished processing ${numTestCases} test cases"
@@ -125,8 +130,10 @@ echo "${firstHeader}" >> "${reportFileName}"
 echo "Finished processing ${numTestCases} test cases" >> "${reportFileName}"
 
 if [ $passed -eq 0 ]; then
-  echo "Test cases failed"
+  echo "  Test cases failed"
   echo "Test cases failed" >> "${reportFileName}"
+else
+  echo "  Test cases passed"
 fi
 
 mv "${reportFileName}" "${testCaseDir}/${reportFileName}"

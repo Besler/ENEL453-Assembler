@@ -1,0 +1,16 @@
+Report created Fri Mar 14 21:39:33 MDT 2014
+====================
+--------------------
+Test Case: commentsTestCase.tst
+--------------------
+Passed: Hex Output
+Passed: Bin Output
+
+--------------------
+Test Case: massTestCase.tst
+--------------------
+Passed: Hex Output
+Passed: Bin Output
+
+====================
+Finished processing 2 test cases
