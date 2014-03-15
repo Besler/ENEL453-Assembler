@@ -7,6 +7,7 @@ An assembler for a simple processor designed in ENEL453.  This supports comments
 ```
   usage: assembly.py [-h] [-v] [-i] [-b] [filename [filename ...]]
 ```
+
 ## Instruction Set
 ```
   load  [Constant]      [Reg0, Reg1]      {load constant to register}
@@ -26,6 +27,19 @@ An assembler for a simple processor designed in ENEL453.  This supports comments
   str   [Reg0, Reg1]                      {Store Rx from UART into register}
 ```
 
+## List of Register:
+Reg0:   General Purpose Register
+
+Reg1:   General Purpose Register
+
+P1:     Register reading into first digit of seven segment display
+
+P2:     Register reading into second digit of seven segment display
+
+Tx:     UART transmit register
+
+Rx:     UART receive register
+
 ## Examples:
 ```
   load 25 Reg0 #Comment, Comment, Comment
@@ -36,16 +50,13 @@ An assembler for a simple processor designed in ENEL453.  This supports comments
   wri P1      # p+++++++
 ```
 
-## List of Register:
-  Reg0:   General Purpose Register
+## Test Cases
+Please enter the `testCases` directory to see a set of test cases.
 
-  Reg1:   General Purpose Register
+Run `$ ./assemblyTest` to run the test cases.
 
-  P1:     Register reading into first digit of seven segment display
+These are then automatically ran and a report is generated in `testCases/TestCasesRan`
 
-  P2:     Register reading into second digit of seven segment display
+## Questions?
 
-  Tx:     UART transmit register
-
-  Rx:     UART receive register
-
+Please do not hesitate to email me at bryce.besler@gmail.com
