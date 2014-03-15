@@ -90,7 +90,7 @@ List of Register:
   Reg1:   General Purpose Register
   P1:     Register reading into first digit of seven segment display
   P2:     Register reading into second digit of seven segment display
-  UART:   UART send register
+  Tx:     UART transmit register
   Rx:     UART receive register"""
   return;
 
