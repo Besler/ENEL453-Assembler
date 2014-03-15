@@ -52,7 +52,23 @@ INSTRUCTION_DICT = {
     'wri'     : 0xE,
     'str'     : 0xF
     };
-
+INSTRUCTION_LENGTH_DICT = {
+    'load'    : 3,
+    'move'    : 2,
+    'add'     : 2,
+    'sub'     : 2,
+    'sr'      : 1,
+    'sl'      : 1,
+    'and'     : 2,
+    'or'      : 2,
+    'inv'     : 1,
+    'j'       : 2,
+    'jaz'     : 2,
+    'jal'     : 2,
+    'jr'      : 1,
+    'wri'     : 2,
+    'str'     : 2
+    };
 # Helper functions
 def doExit(error):
   print "ERROR: {}".format(error);
@@ -61,7 +77,6 @@ def doExit(error):
 
 
 def printInstructions():
-  '''Print the instructions of the machine'''
   print """Instruction Set:
   load  [Constant]      [Reg0, Reg1]      {load constant to register}
   move  [Reg0, Reg1]                      {To Accum}
@@ -100,143 +115,102 @@ def getInstructionCode(lineList, LineCount):
   '''Return the instruction as a binary value'''
   code = INSTRUCTION_DICT[lineList[0]];
   instruction = '{0:012b}'.format(0);
+
+  if(len(lineList) != INSTRUCTION_LENGTH_DICT[lineList[0]]):
+    doExit("Invalid number of arguments to {0} instruciton on line {1}".format(lineList[0], LineCount));
+
   try:
-    if  (code == 0x0): #load
-      if(len(lineList) == 3):
-        # Test bounds of constant
-        if(int(lineList[1]) > CONSTANT_MAX or int(lineList[1]) < CONSTANT_MIN):
-          doExit("Invalid constant range for instruction on line {}".format(LineCount));
-        else:
-          #Determine which register we are storing it in
-          if(lineList[2] == 'reg0'):
-            instruction = '0000' + '{:08b}'.format(int(lineList[1]));
-          elif(lineList[2] == 'reg1'):
-            instruction = '0001' + '{:08b}'.format(int(lineList[1]));
-          else:
-            doExit("Unkown register {0} for load instruciton on line {1}".format(lineList[2], LineCount));
+    if(len(lineList) == 3):
+      # Test bounds of constant
+      if(int(lineList[1]) > CONSTANT_MAX or int(lineList[1]) < CONSTANT_MIN):
+        doExit("Invalid constant range for instruction on line {}".format(LineCount));
       else:
-        doExit("Invalid number of argumnets to load instruction on line {}".format(LineCount));
-    elif(code == 0x2): #move
-      if(len(lineList) == 2):
         #Determine which register we are storing it in
-        if(lineList[1] == 'reg0'):
-          instruction = '0010' + '00000000';
-        elif(lineList[1] == 'reg1'):
-          instruction = '0010' + '10000000';
-        else:
-          doExit("Unkown register {0} for move instruciton on line {1}".format(lineList[1], LineCount));
-      else:
-        doExit("Invalid number of arguments to move instrution on line {}".format(LineCount));
-    elif(code == 0x3): #add
-      if(len(lineList) == 2):
-        if(lineList[1] == 'reg0'):
-          instruction = '0011' + '00000000';
-        elif(lineList[1] == 'reg1'):
-          instruction = '0011' + '10000000';
-        else:
-          doExit("Unkown register {0} for add instruciton on line {1}".format(lineList[1], LineCount));
-      else:
-        doExit("Invalid number of arguments to add instruction on line {}".format(LineCount));
-    elif(code == 0x4): #sub
-      if(len(lineList) == 2):
-        if(lineList[1] == 'reg0'):
-          instruction = '0100' + '00000000';
-        elif(lineList[1] == 'reg1'):
-          instruction = '0100' + '10000000';
-        else:
-          doExit("Unkown register {0} for sub instruciton on line {1}".format(lineList[1], LineCount));
-      else:
-        doExit("Invalid number of arguments to sub instruction on line {}".format(LineCount));
-    elif(code == 0x5): #sr
-      if(len(lineList) == 1):
-        instruction = '0101' + '00000000';
-      else:
-        doExit("Invalid number of arguments to sl instruction on line {}".format(LineCount));
-    elif(code == 0x6): #sl
-      if(len(lineList) == 1):
-        instruction = '0110' + '00000000';
-      else:
-        doExit("Invalid number of arguments to sr instruction on line {}".format(LineCount));
-    elif(code == 0x7): #and
-      if(len(lineList) == 2):
-        if(lineList[1] == 'reg0'):
-          instruction = '0111' + '00000000';
-        elif(lineList[1] == 'reg1'):
-          instruction = '0111' + '10000000';
-        else:
-          doExit("Unkown register {0} for and instruciton on line {1}".format(lineList[1], LineCount));
-      else:
-        doExit("Invalid number of arguments to and instruction on line {}".format(LineCount));
-    elif(code == 0x8): #or
-      if(len(lineList) == 2):
-        if(lineList[1] == 'reg0'):
-          instruction = '1000' + '00000000';
-        elif(lineList[1] == 'reg1'):
-          instruction = '1000' + '10000000';
-        else:
-          doExit("Unkown register {0} for or instruciton on line {1}".format(lineList[1], LineCount));
-      else:
-        doExit("Invalid number of arguments to or instruction on line {}".format(LineCount));
-    elif(code == 0x9): #inv
-      if(len(lineList) == 1):
-        instruction = '1001' + '00000000';
-      else:
-        doExit("Invalid number of arguments to inv instruction on line {}".format(LineCount));
-    elif(code == 0xA): #j
-      if(len(lineList) == 2):
-        if(int(lineList[1]) > ADDRESS_MAX or int(lineList[1]) < ADDRESS_MIN):
-          doExit("Invalid address range for instruction on line {}".format(LineCount));
-        else:
-          instruction = '1010' + '{:08b}'.format(int(lineList[1]));
-      else:
-        doExit("Invalid number of arguments to j instruciton on line {}".format(LineCount));
-    elif(code == 0xB): #jaz
-      if(len(lineList) == 2):
-        if(int(lineList[1]) > ADDRESS_MAX or int(lineList[1]) < ADDRESS_MIN):
-          doExit("Invalid address range for instruction on line {}".format(LineCount));
-        else:
-          instruction = '1011' + '{:08b}'.format(int(lineList[1]));
-      else:
-        doExit("Invalid number of arguments to jaz intruction on line {}".format(LineCount));
-    elif(code == 0xC): #jal
-      if(len(lineList) == 2):
-        if(int(lineList[1]) > ADDRESS_MAX or int(lineList[1]) < ADDRESS_MIN):
-          doExit("Invalid address range for instruction on line {}".format(LineCount));
-        else:
-          instruction = '1100' + '{:08b}'.format(int(lineList[1]));
-      else:
-        doExit("Invalid number of arguments to jal instruction on line {}".format(LineCount));
-    elif(code == 0XD): #jr
-      if(len(lineList) == 1):
-        instruction = '1101' + '00000000';
-      else:
-        doExit("Invalid number of arguments to jr instruction on line {}".format(LineCount));
-    elif(code == 0xE): #wri
-      if(len(lineList) == 2):
         if(lineList[2] == 'reg0'):
-          instruction = '1110' + '00000' + '000';
+          instruction = '0000' + '{:08b}'.format(int(lineList[1]));
         elif(lineList[2] == 'reg1'):
-          instruction = '1110' + '00000' + '001';
-        elif(lineList[2] == 'P1'):
-          instruction = '1110' + '00000' + '010';
-        elif(lineList[2] == 'P2'):
-          instruction = '1110' + '00000' + '011';
-        elif(lineList[2] == 'Tx'):
-          instruction = '1110' + '00000' + '100';
+          instruction = '0001' + '{:08b}'.format(int(lineList[1]));
         else:
-          doExit("Unkown register {0} for wri instruciton on line {1}".format(lineList[2], LineCount));
+          doExit("Unkown register {0} for load instruciton on line {1}".format(lineList[2], LineCount));
+    elif(code == 0x2): #move
+      #Determine which register we are storing it in
+      if(lineList[1] == 'reg0'):
+        instruction = '0010' + '00000000';
+      elif(lineList[1] == 'reg1'):
+        instruction = '0010' + '10000000';
       else:
-        doExit("Invalid number of arguments to wri instruction on line {}".format(LineCount));
+        doExit("Unkown register {0} for move instruciton on line {1}".format(lineList[1], LineCount));
+    elif(code == 0x3): #add
+      if(lineList[1] == 'reg0'):
+        instruction = '0011' + '00000000';
+      elif(lineList[1] == 'reg1'):
+        instruction = '0011' + '10000000';
+      else:
+        doExit("Unkown register {0} for add instruciton on line {1}".format(lineList[1], LineCount));
+    elif(code == 0x4): #sub
+      if(lineList[1] == 'reg0'):
+        instruction = '0100' + '00000000';
+      elif(lineList[1] == 'reg1'):
+        instruction = '0100' + '10000000';
+      else:
+        doExit("Unkown register {0} for sub instruciton on line {1}".format(lineList[1], LineCount));
+    elif(code == 0x5): #sr
+      instruction = '0101' + '00000000';
+    elif(code == 0x6): #sl
+      instruction = '0110' + '00000000';
+    elif(code == 0x7): #and
+      if(lineList[1] == 'reg0'):
+        instruction = '0111' + '00000000';
+      elif(lineList[1] == 'reg1'):
+        instruction = '0111' + '10000000';
+      else:
+        doExit("Unkown register {0} for and instruciton on line {1}".format(lineList[1], LineCount));
+    elif(code == 0x8): #or
+      if(lineList[1] == 'reg0'):
+        instruction = '1000' + '00000000';
+      elif(lineList[1] == 'reg1'):
+        instruction = '1000' + '10000000';
+      else:
+        doExit("Unkown register {0} for or instruciton on line {1}".format(lineList[1], LineCount));
+    elif(code == 0x9): #inv
+      instruction = '1001' + '00000000';
+    elif(code == 0xA): #j
+      if(int(lineList[1]) > ADDRESS_MAX or int(lineList[1]) < ADDRESS_MIN):
+        doExit("Invalid address range for instruction on line {}".format(LineCount));
+      else:
+        instruction = '1010' + '{:08b}'.format(int(lineList[1]));
+    elif(code == 0xB): #jaz
+      if(int(lineList[1]) > ADDRESS_MAX or int(lineList[1]) < ADDRESS_MIN):
+        doExit("Invalid address range for instruction on line {}".format(LineCount));
+      else:
+        instruction = '1011' + '{:08b}'.format(int(lineList[1]));
+    elif(code == 0xC): #jal
+      if(int(lineList[1]) > ADDRESS_MAX or int(lineList[1]) < ADDRESS_MIN):
+        doExit("Invalid address range for instruction on line {}".format(LineCount));
+      else:
+        instruction = '1100' + '{:08b}'.format(int(lineList[1]));
+    elif(code == 0XD): #jr
+      instruction = '1101' + '00000000';
+    elif(code == 0xE): #wri
+      if(lineList[2] == 'reg0'):
+        instruction = '1110' + '00000' + '000';
+      elif(lineList[2] == 'reg1'):
+        instruction = '1110' + '00000' + '001';
+      elif(lineList[2] == 'P1'):
+        instruction = '1110' + '00000' + '010';
+      elif(lineList[2] == 'P2'):
+        instruction = '1110' + '00000' + '011';
+      elif(lineList[2] == 'Tx'):
+        instruction = '1110' + '00000' + '100';
+      else:
+        doExit("Unkown register {0} for wri instruciton on line {1}".format(lineList[2], LineCount));
     elif(code == 0xF): #str
-      if(len(lineList) == 2):
-        if(lineList[1] == 'reg0'):
-          instruction = '1111' + '00000000';
-        elif(lineList[1] == 'reg1'):
-          instruction = '1111' + '10000000';
-        else:
-          doExit("Unkown register {0} for str instruciton on line {1}".format(lineList[1], LineCount));
+      if(lineList[1] == 'reg0'):
+        instruction = '1111' + '00000000';
+      elif(lineList[1] == 'reg1'):
+        instruction = '1111' + '10000000';
       else:
-        doExit("Invalid number of arguments to str instruction on line {}".format(LineCount));
+        doExit("Unkown register {0} for str instruciton on line {1}".format(lineList[1], LineCount));
   except:
     doExit("Unkown error occured on line {}".format(LineCount));
   return instruction;
@@ -259,29 +233,31 @@ def fixString(line):
   return lineList;
 
 # Parse Arguments
-parser = argparse.ArgumentParser(description='An assembler for a small processor build in ENEL453',
-                                version=0.1
-                                );
+parser = argparse.ArgumentParser( description='An assembler for a small processor build in ENEL453',
+                                  version=0.1
+                                  );
+
 parser.add_argument(  'filename',
                       help='File name of the file you would like to convert to assembly',
-                      nargs=1,
+                      nargs='*',
                       );
 parser.add_argument(  '-i', '--instructions',
-                      help='Print Instructions and exit',
-                      action='store_true'
+                      action='store_true',
+                      help='Print Instructions and exit'
                       );
-parser.add_argument(  '-d', '--decimal',
-                      help='Output in decimal, default is hex',
+parser.add_argument(  '-b', '--binary',
+                      help='Output in binary, default is hex',
                       action='store_true',
                       default=False
                       );
 args = parser.parse_args();
 
-# If they want to see the instruction set, let them have it
-if(args.instructions == True):
+if args.instructions:
   printInstructions();
-  print "Exiting...";
-  os.sys.exit(0);
+
+if len(args.filename) == 0:
+  parser.print_help();
+  doExit("Did not receive a file to assemble");
 
 for name in args.filename:
   # Attempt to open output file

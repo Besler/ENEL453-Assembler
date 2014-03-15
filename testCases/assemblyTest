@@ -1,0 +1,128 @@
+#!/bin/bash
+
+# Created by Bryce Besler
+#     bryce.besler@gmail.com
+#
+# This script runs test cases on an assembler
+#
+# Assumptions:
+#   - All test cases are in the form testcase.tst
+#   - No test case contains a space in the file name
+#   - All test cases are in the working directory (where this script is ran)
+#   - There are testcase.ass.hex and testcase.ass.bin representing the correct hex and binary outputs respectively
+#   - The program, assembler.py, is exactly one director above the directory this program is in
+
+# Constants and Globals
+testFileAbb='.tst'
+outFileAbb='.out'
+hexFileAbb='.ass.hex'
+baseHexFileAbb='.hex'
+binFileAbb='.ass.bin'
+baseBinFileAbb='.bin'
+
+programFile='../assembler.py'
+
+numTestCases=0
+testDir="TestCasesRan"
+testCaseDir="${testDir}/`date +'%y-%m-%d--%H-%M'`"
+reportFileName="`date +'%y-%m-%d--%H-%M'`_report.txt"
+passed=1
+
+firstHeader="===================="
+secondHeader="--------------------"
+
+# Get input of all files in this directory
+testFiles="`ls *${testFileAbb}`" #-1 lists one per line for the case of a file with a space in the name
+
+# Test if all files are in the directory
+for file in ${testFiles}; do
+  temp="`basename ${file} ${testFileAbb}`"
+
+  if [ ! -f ${temp}${hexFileAbb} ]; then
+    echo "ERROR: Could not find hex output file for ${file}"
+    echo "Excepted file ${temp}${hexFileAbb}"
+    echo "Exiting..."
+    exit 1
+  fi
+
+  if [ ! -f ${temp}${binFileAbb} ]; then
+    echo "ERROR: Could not find binary output file for ${file}"
+    echo "Excepted file ${temp}${binFileAbb}"
+    echo "Exiting..."
+    exit 1
+  fi
+done
+
+# Create the directory we want to store our test case
+if [ -n "${testFiles}" ]; then
+  if [ ! -d ${testCaseDir} ]; then
+    mkdir -p ${testCaseDir}
+  fi
+fi
+
+# Create file and header
+touch "${reportFileName}"
+echo "Report created `date`" >> "${reportFileName}"
+echo "${firstHeader}" >> "${reportFileName}"
+
+# For each file, run the program, test the cases, see if it works
+for file in ${testFiles}; do
+  temp="`basename ${file} ${testFileAbb}`"
+  numTestCases=$((numTestCases+1))
+
+  # Label in report
+  echo "${secondHeader}" >> "${reportFileName}"
+  echo "Test Case: ${file}"
+  echo "${secondHeader}" >> "${reportFileName}"
+
+  # Run it as a hex file
+  python ${programFile} ${file} >> "${temp}${outFileAbb}"
+  sdiffOutput="`sdiff -s ${temp}${baseHexFileAbb} ${temp}${hexFileAbb}`"
+  if [ -n "${sdiffOutput}" ]; then
+    passed=0
+    echo "FAILED: Hex Output" >> "${reportFileName}"
+    echo "Test file ${file} failed hex output. Showing differences below"
+    echo ${sDiffOutput} >> "${reportFileName}"
+    echo ${sDiffOutput}
+  else
+    echo "Passed: Hex Output" >> "${reportFileName}"
+  fi
+
+  # Move the files to the test directory
+  mv "${temp}${outFileAbb}" "${testCaseDir}/${temp}${baseHexFileAbb}${outFileAbb}"
+  mv "${temp}${baseHexFileAbb}" "${testCaseDir}/${temp}${hexFileAbb}"
+
+  # Run it as a binary file
+  python ${programFile} -b ${file} >> "${temp}${outFileAbb}"
+  sdiffOutput="`sdiff -s ${temp}${baseBinFileAbb} ${temp}${binFileAbb}`"
+  if [ -n "${sdiffOutput}" ]; then
+    passed=0
+    echo "FAILED: Bin Output" >> "${reportFileName}"
+    echo "Test file ${file} failed bin output. Showing differences below"
+    echo ${sDiffOutput} >> "${reportFileName}"
+    echo ${sDiffOutput}
+  else
+    echo "Passed: Bin Output" >> "${reportFileName}"
+  fi
+
+  # Move the files to the test directory
+  mv "${temp}${outFileAbb}" "${testCaseDir}/${temp}${baseBinFileAbb}${outFileAbb}"
+  mv "${temp}${baseBinFileAbb}" "${testCaseDir}/${temp}${binFileAbb}"
+
+  # Split by end line
+  echo "" >> "${reportFileName}"
+done
+
+# Print information on the processing
+echo "Finished processing ${numTestCases} test cases"
+echo "${firstHeader}" >> "${reportFileName}"
+echo "Finished processing ${numTestCases} test cases" >> "${reportFileName}"
+
+if [ $passed -eq 0 ]; then
+  echo "Test cases failed"
+  echo "Test cases failed" >> "${reportFileName}"
+fi
+
+mv "${reportFileName}" "${testCaseDir}/${reportFileName}"
+
+echo "Finished"
