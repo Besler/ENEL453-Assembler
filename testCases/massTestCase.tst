@@ -1,7 +1,7 @@
 load 0 Reg0
 load 255 Reg0
 load 0 Reg1
-load 255 Reg0
+load 255 Reg1
 move Reg0
 move Reg1
 add Reg0
@@ -20,7 +20,7 @@ j 22
 jaz 0
 jaz 22
 jal 0
-jal 30
+jal 22
 jr
 wri Reg0
 wri Reg1

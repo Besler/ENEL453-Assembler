@@ -35,23 +35,6 @@ CONSTANT_MAX = 255; # Largest number in 8 unsigned bits
 CONSTANT_MIN = 0; # Only using unsigned bits
 ADDRESS_MAX = 255; # Largest address
 ADDRESS_MIN = 0; # Can't go lower than zero
-INSTRUCTION_DICT = {
-    'load'    : 0x0,
-    'move'    : 0x2,
-    'add'     : 0x3,
-    'sub'     : 0x4,
-    'sr'      : 0x5,
-    'sl'      : 0x6,
-    'and'     : 0x7,
-    'or'      : 0x8,
-    'inv'     : 0x9,
-    'j'       : 0xA,
-    'jaz'     : 0xB,
-    'jal'     : 0xC,
-    'jr'      : 0xD,
-    'wri'     : 0xE,
-    'str'     : 0xF
-    };
 INSTRUCTION_LENGTH_DICT = {
     'load'    : 3,
     'move'    : 2,
@@ -113,14 +96,14 @@ List of Register:
 
 def getInstructionCode(lineList, LineCount):
   '''Return the instruction as a binary value'''
-  code = INSTRUCTION_DICT[lineList[0]];
   instruction = '{0:012b}'.format(0);
 
   if(len(lineList) != INSTRUCTION_LENGTH_DICT[lineList[0]]):
     doExit("Invalid number of arguments to {0} instruciton on line {1}".format(lineList[0], LineCount));
+  code = lineList[0];
 
   try:
-    if(len(lineList) == 3):
+    if(code == 'load'):
       # Test bounds of constant
       if(int(lineList[1]) > CONSTANT_MAX or int(lineList[1]) < CONSTANT_MIN):
         doExit("Invalid constant range for instruction on line {}".format(LineCount));
@@ -132,7 +115,7 @@ def getInstructionCode(lineList, LineCount):
           instruction = '0001' + '{:08b}'.format(int(lineList[1]));
         else:
           doExit("Unkown register {0} for load instruciton on line {1}".format(lineList[2], LineCount));
-    elif(code == 0x2): #move
+    elif(code == 'move'):
       #Determine which register we are storing it in
       if(lineList[1] == 'reg0'):
         instruction = '0010' + '00000000';
@@ -140,71 +123,71 @@ def getInstructionCode(lineList, LineCount):
         instruction = '0010' + '10000000';
       else:
         doExit("Unkown register {0} for move instruciton on line {1}".format(lineList[1], LineCount));
-    elif(code == 0x3): #add
+    elif(code == 'add'):
       if(lineList[1] == 'reg0'):
         instruction = '0011' + '00000000';
       elif(lineList[1] == 'reg1'):
         instruction = '0011' + '10000000';
       else:
         doExit("Unkown register {0} for add instruciton on line {1}".format(lineList[1], LineCount));
-    elif(code == 0x4): #sub
+    elif(code == 'sub'):
       if(lineList[1] == 'reg0'):
         instruction = '0100' + '00000000';
       elif(lineList[1] == 'reg1'):
         instruction = '0100' + '10000000';
       else:
         doExit("Unkown register {0} for sub instruciton on line {1}".format(lineList[1], LineCount));
-    elif(code == 0x5): #sr
+    elif(code == 'sr'):
       instruction = '0101' + '00000000';
-    elif(code == 0x6): #sl
+    elif(code == 'sl'):
       instruction = '0110' + '00000000';
-    elif(code == 0x7): #and
+    elif(code == 'and'):
       if(lineList[1] == 'reg0'):
         instruction = '0111' + '00000000';
       elif(lineList[1] == 'reg1'):
         instruction = '0111' + '10000000';
       else:
         doExit("Unkown register {0} for and instruciton on line {1}".format(lineList[1], LineCount));
-    elif(code == 0x8): #or
+    elif(code == 'or'):
       if(lineList[1] == 'reg0'):
         instruction = '1000' + '00000000';
       elif(lineList[1] == 'reg1'):
         instruction = '1000' + '10000000';
       else:
         doExit("Unkown register {0} for or instruciton on line {1}".format(lineList[1], LineCount));
-    elif(code == 0x9): #inv
+    elif(code == 'inv'):
       instruction = '1001' + '00000000';
-    elif(code == 0xA): #j
+    elif(code == 'j'):
       if(int(lineList[1]) > ADDRESS_MAX or int(lineList[1]) < ADDRESS_MIN):
         doExit("Invalid address range for instruction on line {}".format(LineCount));
       else:
         instruction = '1010' + '{:08b}'.format(int(lineList[1]));
-    elif(code == 0xB): #jaz
+    elif(code == 'jaz'):
       if(int(lineList[1]) > ADDRESS_MAX or int(lineList[1]) < ADDRESS_MIN):
         doExit("Invalid address range for instruction on line {}".format(LineCount));
       else:
         instruction = '1011' + '{:08b}'.format(int(lineList[1]));
-    elif(code == 0xC): #jal
+    elif(code == 'jal'):
       if(int(lineList[1]) > ADDRESS_MAX or int(lineList[1]) < ADDRESS_MIN):
         doExit("Invalid address range for instruction on line {}".format(LineCount));
       else:
         instruction = '1100' + '{:08b}'.format(int(lineList[1]));
-    elif(code == 0XD): #jr
+    elif(code == 'jr'):
       instruction = '1101' + '00000000';
-    elif(code == 0xE): #wri
-      if(lineList[2] == 'reg0'):
+    elif(code == 'wri'):
+      if(lineList[1] == 'reg0'):
         instruction = '1110' + '00000' + '000';
-      elif(lineList[2] == 'reg1'):
+      elif(lineList[1] == 'reg1'):
         instruction = '1110' + '00000' + '001';
-      elif(lineList[2] == 'P1'):
+      elif(lineList[1] == 'p1'):
         instruction = '1110' + '00000' + '010';
-      elif(lineList[2] == 'P2'):
+      elif(lineList[1] == 'p2'):
         instruction = '1110' + '00000' + '011';
-      elif(lineList[2] == 'Tx'):
+      elif(lineList[1] == 'tx'):
         instruction = '1110' + '00000' + '100';
       else:
         doExit("Unkown register {0} for wri instruciton on line {1}".format(lineList[2], LineCount));
-    elif(code == 0xF): #str
+    elif(code == 'str'):
       if(lineList[1] == 'reg0'):
         instruction = '1111' + '00000000';
       elif(lineList[1] == 'reg1'):
@@ -212,7 +195,7 @@ def getInstructionCode(lineList, LineCount):
       else:
         doExit("Unkown register {0} for str instruciton on line {1}".format(lineList[1], LineCount));
   except:
-    doExit("Unkown error occured on line {}".format(LineCount));
+    doExit("Unkown code {0} occured on line {1}".format(lineList, LineCount));
   return instruction;
 
 def fixString(line):
@@ -281,12 +264,9 @@ for name in args.filename:
       if(lineList == []):
         continue;
 
-      if lineList[0] in INSTRUCTION_DICT:
-        instructionCode = getInstructionCode(lineList, LineCount);
-      else:
-        doExit('Unkown code {0} at line {1}'.format(lineList, LineCount));
+      instructionCode = getInstructionCode(lineList, LineCount);
 
-      if(args.decimal == False):
+      if(args.binary == False):
         instructionCode = "{0:#05X}".format(int(instructionCode,2));
 
       out.write(instructionCode);

@@ -15,12 +15,13 @@
 # Constants and Globals
 testFileAbb='.tst'
 outFileAbb='.out'
-hexFileAbb='.ass.hex'
+assFileAbb='.ass'
+hexFileAbb="${assFileAbb}.hex"
 baseHexFileAbb='.hex'
-binFileAbb='.ass.bin'
+binFileAbb="${assFileAbb}.bin"
 baseBinFileAbb='.bin'
 
-programFile='../assembler.py'
+programFile='assembly.py'
 
 numTestCases=0
 testDir="TestCasesRan"
@@ -60,6 +61,9 @@ if [ -n "${testFiles}" ]; then
   fi
 fi
 
+# Move python file here
+cp "../${programFile}" .
+
 # Create file and header
 touch "${reportFileName}"
 echo "Report created `date`" >> "${reportFileName}"
@@ -72,42 +76,44 @@ for file in ${testFiles}; do
 
   # Label in report
   echo "${secondHeader}" >> "${reportFileName}"
-  echo "Test Case: ${file}"
+  echo "Test Case: ${file}" >> "${reportFileName}"
   echo "${secondHeader}" >> "${reportFileName}"
 
   # Run it as a hex file
   python ${programFile} ${file} >> "${temp}${outFileAbb}"
-  sdiffOutput="`sdiff -s ${temp}${baseHexFileAbb} ${temp}${hexFileAbb}`"
+  sdiffOutput="`sdiff -s ${temp}${hexFileAbb} ${temp}${assFileAbb}`"
   if [ -n "${sdiffOutput}" ]; then
     passed=0
     echo "FAILED: Hex Output" >> "${reportFileName}"
     echo "Test file ${file} failed hex output. Showing differences below"
-    echo ${sDiffOutput} >> "${reportFileName}"
-    echo ${sDiffOutput}
+    sdiff -s ${temp}${hexFileAbb} ${temp}${assFileAbb} >> "${reportFileName}"
+    sdiff -s ${temp}${hexFileAbb} ${temp}${assFileAbb}
   else
+    echo "Passed: Hex Output"
     echo "Passed: Hex Output" >> "${reportFileName}"
   fi
 
   # Move the files to the test directory
   mv "${temp}${outFileAbb}" "${testCaseDir}/${temp}${baseHexFileAbb}${outFileAbb}"
-  mv "${temp}${baseHexFileAbb}" "${testCaseDir}/${temp}${hexFileAbb}"
+  mv "${temp}${assFileAbb}" "${testCaseDir}/${temp}${hexFileAbb}"
 
   # Run it as a binary file
   python ${programFile} -b ${file} >> "${temp}${outFileAbb}"
-  sdiffOutput="`sdiff -s ${temp}${baseBinFileAbb} ${temp}${binFileAbb}`"
+  sdiffOutput="`sdiff -s ${temp}${binFileAbb} ${temp}${assFileAbb}`"
   if [ -n "${sdiffOutput}" ]; then
     passed=0
     echo "FAILED: Bin Output" >> "${reportFileName}"
     echo "Test file ${file} failed bin output. Showing differences below"
-    echo ${sDiffOutput} >> "${reportFileName}"
-    echo ${sDiffOutput}
+    sdiff -s ${temp}${binFileAbb} ${temp}${assFileAbb} >> "${reportFileName}"
+    sdiff -s ${temp}${binFileAbb} ${temp}${assFileAbb}
   else
+    echo "Passed: Bin Output"
     echo "Passed: Bin Output" >> "${reportFileName}"
   fi
 
   # Move the files to the test directory
   mv "${temp}${outFileAbb}" "${testCaseDir}/${temp}${baseBinFileAbb}${outFileAbb}"
-  mv "${temp}${baseBinFileAbb}" "${testCaseDir}/${temp}${binFileAbb}"
+  mv "${temp}${assFileAbb}" "${testCaseDir}/${temp}${binFileAbb}"
 
   # Split by end line
   echo "" >> "${reportFileName}"
@@ -124,5 +130,6 @@ if [ $passed -eq 0 ]; then
 fi
 
 mv "${reportFileName}" "${testCaseDir}/${reportFileName}"
+mv "${programFile}" "${testCaseDir}/${programFile}"
 
 echo "Finished"
