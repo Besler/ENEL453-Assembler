@@ -56,7 +56,3 @@ Please enter the `testCases` directory to see a set of test cases.
 Run `$ ./assemblyTest` to run the test cases.
 
 These are then automatically ran and a report is generated in `testCases/TestCasesRan`
-
-## Questions?
-
-Please do not hesitate to email me at bryce.besler@gmail.com
